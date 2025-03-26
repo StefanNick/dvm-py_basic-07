@@ -5,11 +5,6 @@ from dotenv import load_dotenv
 from pytimeparse import parse
 
 
-SECRETS = load_dotenv()
-TG_TOKEN = os.getenv("TG_TOKEN")
-BOT = ptbot.Bot(TG_TOKEN)
-
-
 def render_progressbar(
     total, iteration, prefix="", suffix="", length=30, fill="█", zfill="░"
 ):
@@ -22,30 +17,33 @@ def render_progressbar(
 
 
 def last_message(author_id):
-    BOT.send_message(author_id, "Время вышло")
+    bot.send_message(author_id, "Время вышло")
 
 
 def notify_progress(secs_left, author_id, id, total):
     message = "Осталось {} секунд.\n {}".format(
         secs_left, render_progressbar(total, total - secs_left)
     )
-    BOT.update_message(author_id, id, message)
+    bot.update_message(author_id, id, message)
 
 
 def reply(chat_id, time):
     seconds = parse(time)
     total_sec = seconds
-    message_id = BOT.send_message(chat_id, "Запускаю таймер")
-    BOT.create_countdown(
+    message_id = bot.send_message(chat_id, "Запускаю таймер")
+    bot.create_countdown(
         seconds, notify_progress, author_id=chat_id, id=message_id, total=total_sec
     )
-    BOT.create_timer(seconds, last_message, author_id=chat_id)
+    bot.create_timer(seconds, last_message, author_id=chat_id)
 
 
 def main():
-    BOT.reply_on_message(reply)
-    BOT.run_bot()
+    bot.reply_on_message(reply)
+    bot.run_bot()
 
 
 if __name__ == "__main__":
+    load_dotenv()
+    tg_token = os.getenv("TG_TOKEN")
+    bot = ptbot.Bot(tg_token)
     main()
